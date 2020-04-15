@@ -6,8 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -17,6 +16,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+
+    private var locationRequest: LocationRequest? = null
 
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -82,11 +83,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             requestLocationPermissions()
         } else {
 
+            if (locationRequest == null) {
+                locationRequest = LocationRequest.create()
+                locationRequest?.let { locationRequest ->
+                    locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                    locationRequest.interval = 5000
+                    locationRequest.fastestInterval = 1000
+
+                    val locationCallback = object : LocationCallback() {
+                        override fun onLocationResult(locationResult: LocationResult?) {
+                            getCurrentLocation()
+                        }
+                    }
+
+                    fusedLocationClient.requestLocationUpdates(
+                        locationRequest,
+                        locationCallback,
+                        null
+                    )
+                }
+            }
+
             fusedLocationClient.lastLocation.addOnCompleteListener {
                 val location = it.result
                 if (location != null) {
 
                     val latLng = LatLng(location.latitude, location.longitude)
+
+                    mMap.clear()
 
                     mMap.addMarker(MarkerOptions().position(latLng).title("You are here!"))
 
