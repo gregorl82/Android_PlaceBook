@@ -17,8 +17,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private var locationRequest: LocationRequest? = null
-
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -83,36 +81,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             requestLocationPermissions()
         } else {
 
-            if (locationRequest == null) {
-                locationRequest = LocationRequest.create()
-                locationRequest?.let { locationRequest ->
-                    locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                    locationRequest.interval = 5000
-                    locationRequest.fastestInterval = 1000
 
-                    val locationCallback = object : LocationCallback() {
-                        override fun onLocationResult(locationResult: LocationResult?) {
-                            getCurrentLocation()
-                        }
-                    }
 
-                    fusedLocationClient.requestLocationUpdates(
-                        locationRequest,
-                        locationCallback,
-                        null
-                    )
-                }
-            }
+            mMap.isMyLocationEnabled = true
 
             fusedLocationClient.lastLocation.addOnCompleteListener {
                 val location = it.result
                 if (location != null) {
 
                     val latLng = LatLng(location.latitude, location.longitude)
-
-                    mMap.clear()
-
-                    mMap.addMarker(MarkerOptions().position(latLng).title("You are here!"))
 
                     val update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
 
