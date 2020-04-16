@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.example.android.placebook.adapter.BookmarkInfoWindowAdapter
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.*
 
@@ -46,6 +47,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setInfoWindowAdapter(BookmarkInfoWindowAdapter(this))
         getCurrentLocation()
 
         mMap.setOnPoiClickListener {
@@ -177,18 +179,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun displayPoiDisplayStep(place: Place, photo: Bitmap?) {
-        val iconPhoto = if (photo == null) {
-            BitmapDescriptorFactory.defaultMarker()
-        } else {
-            BitmapDescriptorFactory.fromBitmap(photo)
-        }
 
-        mMap.addMarker(MarkerOptions()
+        val marker = mMap.addMarker(MarkerOptions()
                 .position(place.latLng as LatLng)
-                .icon(iconPhoto)
                 .title(place.name)
                 .snippet(place.phoneNumber)
         )
+        marker?.tag = photo
     }
 
     companion object {
