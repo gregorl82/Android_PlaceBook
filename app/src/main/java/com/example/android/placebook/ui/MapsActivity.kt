@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModelProviders
 import com.example.android.placebook.R
 import com.example.android.placebook.adapter.BookmarkInfoWindowAdapter
+import com.example.android.placebook.viewmodel.MapsViewModel
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.*
 
@@ -17,6 +19,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
 
@@ -26,12 +29,15 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private lateinit var mMap: GoogleMap
+    private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
+    private lateinit var mapsViewModel: MapsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,18 +52,41 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        mMap.setInfoWindowAdapter(BookmarkInfoWindowAdapter(this))
+        map = googleMap
+        setupMapListeners()
+        setupViewModel()
         getCurrentLocation()
+    }
 
-        mMap.setOnPoiClickListener {
+    private fun setupMapListeners() {
+        map.setInfoWindowAdapter(BookmarkInfoWindowAdapter(this))
+        map.setOnPoiClickListener {
             displayPoi(it)
+        }
+        map.setOnInfoWindowClickListener {
+            handleInfoWindowClick(it)
         }
     }
 
     private fun setupPlacesClient() {
         Places.initialize(applicationContext, getString(R.string.google_maps_key))
         placesClient = Places.createClient(this)
+    }
+
+    private fun setupLocationClient() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private fun setupViewModel() {
+        mapsViewModel = ViewModelProviders.of(this).get(MapsViewModel::class.java)
+    }
+
+    private fun requestLocationPermissions() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            REQUEST_LOCATION
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -74,18 +103,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun setupLocationClient() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    }
-
-    private fun requestLocationPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            REQUEST_LOCATION
-        )
-    }
-
     private fun getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -96,7 +113,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             requestLocationPermissions()
         } else {
 
-            mMap.isMyLocationEnabled = true
+            map.isMyLocationEnabled = true
 
             fusedLocationClient.lastLocation.addOnCompleteListener {
                 val location = it.result
@@ -106,7 +123,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     val update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
 
-                    mMap.moveCamera(update)
+                    map.moveCamera(update)
                 } else {
                     Log.e(TAG, "No location found")
                 }
@@ -180,16 +197,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun displayPoiDisplayStep(place: Place, photo: Bitmap?) {
 
-        val marker = mMap.addMarker(MarkerOptions()
+        val marker = map.addMarker(
+            MarkerOptions()
                 .position(place.latLng as LatLng)
                 .title(place.name)
                 .snippet(place.phoneNumber)
         )
-        marker?.tag = photo
+        marker?.tag = PlaceInfo(place, photo)
+    }
+
+    private fun handleInfoWindowClick(marker: Marker) {
+        val placeInfo = (marker.tag as PlaceInfo)
+        if (placeInfo.place != null) {
+            GlobalScope.launch {
+                mapsViewModel.addBookmarkFromPlace(placeInfo.place, placeInfo.image)
+            }
+        }
+        marker.remove()
     }
 
     companion object {
         private const val REQUEST_LOCATION = 1
         private const val TAG = "MapsActivity"
     }
+
+    class PlaceInfo(val place: Place? = null, val image: Bitmap? = null)
 }
