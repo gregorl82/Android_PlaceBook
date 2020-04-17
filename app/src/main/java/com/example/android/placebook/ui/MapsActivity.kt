@@ -1,4 +1,4 @@
-package com.example.android.placebook
+package com.example.android.placebook.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.example.android.placebook.R
 import com.example.android.placebook.adapter.BookmarkInfoWindowAdapter
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.*
@@ -15,7 +16,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
