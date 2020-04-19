@@ -2,7 +2,9 @@ package com.example.android.placebook.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileOutputStream
 
 object ImageUtils {
@@ -27,5 +29,10 @@ object ImageUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun loadBitmapFromFile(context: Context, filename: String): Bitmap? {
+        val filePath = File(context.filesDir, filename).absolutePath
+        return BitmapFactory.decodeFile(filePath)
     }
 }

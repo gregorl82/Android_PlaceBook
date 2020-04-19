@@ -1,6 +1,7 @@
 package com.example.android.placebook.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -8,6 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.example.android.placebook.model.Bookmark
 import com.example.android.placebook.repository.BookmarkRepo
+import com.example.android.placebook.util.ImageUtils
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 
@@ -58,5 +60,13 @@ class MapsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    data class BookmarkMarkerView(var id: Long? = null, var location: LatLng = LatLng(0.0, 0.0))
+    data class BookmarkMarkerView(var id: Long? = null, var location: LatLng = LatLng(0.0, 0.0)) {
+
+        fun getImage(context: Context): Bitmap? {
+            id?.let {
+                return ImageUtils.loadBitmapFromFile(context, Bookmark.generateImageFilename(it))
+            }
+            return null
+        }
+    }
 }
