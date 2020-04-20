@@ -14,6 +14,6 @@ class BookMarkDetailsActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(toolbar as Toolbar?)
+        setSupportActionBar(toolbar)
     }
 }
