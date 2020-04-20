@@ -3,6 +3,7 @@ package com.example.android.placebook.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -11,7 +12,7 @@ import com.example.android.placebook.R
 import com.example.android.placebook.viewmodel.BookmarkDetailsViewModel
 import kotlinx.android.synthetic.main.activity_bookmark_details.*
 
-class BookMarkDetailsActivity : AppCompatActivity() {
+class BookmarkDetailsActivity : AppCompatActivity(), PhotoOptionDialogFragment.PhotoOptionDialogListener {
 
     private lateinit var bookmarkDetailsViewModel: BookmarkDetailsViewModel
     private var bookmarkDetailsView: BookmarkDetailsViewModel.BookmarkDetailsView? = null
@@ -79,6 +80,9 @@ class BookMarkDetailsActivity : AppCompatActivity() {
                 imageViewPlace.setImageBitmap(placeImage)
             }
         }
+        imageViewPlace.setOnClickListener {
+            replaceImage()
+        }
     }
 
     private fun saveChanges() {
@@ -94,6 +98,19 @@ class BookMarkDetailsActivity : AppCompatActivity() {
             bookmarkDetailsViewModel.updateBookmark(bookmarkView)
         }
         finish()
+    }
+
+    private fun replaceImage() {
+        val newFragment = PhotoOptionDialogFragment.newInstance(this)
+        newFragment?.show(supportFragmentManager, "photoOptionDialog")
+    }
+
+    override fun onCaptureClick() {
+        Toast.makeText(this, "Camera Capture", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onPickClick() {
+        Toast.makeText(this, "Gallery Pick", Toast.LENGTH_SHORT).show()
     }
 
 }

@@ -39,7 +39,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.BookMarkDetailsActivity"
+        <activity android:name=".ui.BookmarkDetailsActivity"
             android:label="Bookmark"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
