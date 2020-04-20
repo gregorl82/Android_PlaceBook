@@ -1,6 +1,8 @@
 package com.example.android.placebook.ui
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
@@ -20,6 +22,22 @@ class BookMarkDetailsActivity : AppCompatActivity() {
         setupToolbar()
         setupViewModel()
         getIntentData()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu_bookmark_details, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_save -> {
+                saveChanges()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
     }
 
     private fun setupToolbar() {
@@ -61,6 +79,21 @@ class BookMarkDetailsActivity : AppCompatActivity() {
                 imageViewPlace.setImageBitmap(placeImage)
             }
         }
+    }
+
+    private fun saveChanges() {
+        val name = editTextName.text.toString()
+        if (name.isEmpty()) {
+            return
+        }
+        bookmarkDetailsView?.let { bookmarkView ->
+            bookmarkView.name = editTextName.text.toString()
+            bookmarkView.notes = editTextNotes.text.toString()
+            bookmarkView.address = editTextAddress.text.toString()
+            bookmarkView.phone = editTextPhone.text.toString()
+            bookmarkDetailsViewModel.updateBookmark(bookmarkView)
+        }
+        finish()
     }
 
 }
