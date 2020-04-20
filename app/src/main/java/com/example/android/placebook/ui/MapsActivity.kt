@@ -262,10 +262,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun startBookmarkDetails(bookmarkId: Long) {
         val intent = Intent(this, BookMarkDetailsActivity::class.java)
+        intent.putExtra(EXTRA_BOOKMARK_ID, bookmarkId)
         startActivity(intent)
     }
 
     companion object {
+        const val EXTRA_BOOKMARK_ID = "com.example.placebook.EXTRA_BOOKMARK_ID"
         private const val REQUEST_LOCATION = 1
         private const val TAG = "MapsActivity"
     }
