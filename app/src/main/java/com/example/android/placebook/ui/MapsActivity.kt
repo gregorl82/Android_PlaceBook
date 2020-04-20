@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -43,6 +44,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var placesClient: PlacesClient
     private lateinit var mapsViewModel: MapsViewModel
     private lateinit var bookmarkListAdapter: BookmarkListAdapter
+    private var markers = HashMap<Long, Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +114,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapsViewModel.getBookmarkViews()
             ?.observe(this, androidx.lifecycle.Observer<List<MapsViewModel.BookmarkView>> {
                 map.clear()
+                markers.clear()
                 it?.let {
                     displayAllBookmarks(it)
                     bookmarkListAdapter.setBookmarkData(it)
@@ -252,6 +255,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    fun moveToBookmark(bookmark: MapsViewModel.BookmarkView) {
+
+        drawerLayout.closeDrawer(drawerView)
+
+        val marker = markers[bookmark.id]
+
+        marker?.showInfoWindow()
+
+        val location = Location("")
+        location.latitude = bookmark.location.latitude
+        location.longitude = bookmark.location.longitude
+        updateMapToLocation(location)
+    }
+
+    private fun updateMapToLocation(location: Location) {
+        val latLng = LatLng(location.latitude, location.longitude)
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f))
+    }
+
     private fun handleInfoWindowClick(marker: Marker) {
         when (marker.tag) {
             is MapsActivity.PlaceInfo -> {
@@ -285,7 +307,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
 
         marker.tag = bookmark
-
+        bookmark.id?.let { markers.put(it, marker) }
         return marker
     }
 

@@ -18,6 +18,13 @@ class BookmarkListAdapter(
     class ViewHolder(v: View, private val mapsActivity: MapsActivity) : RecyclerView.ViewHolder(v) {
         val nameTextView: TextView = v.findViewById(R.id.bookmarkNameTextView) as TextView
         val categoryImageView: ImageView = v.findViewById(R.id.bookmarkIcon) as ImageView
+
+        init {
+            v.setOnClickListener {
+                val bookmarkView = itemView.tag as MapsViewModel.BookmarkView
+                mapsActivity.moveToBookmark(bookmarkView)
+            }
+        }
     }
 
     fun setBookmarkData(bookmarks: List<MapsViewModel.BookmarkView>) {
