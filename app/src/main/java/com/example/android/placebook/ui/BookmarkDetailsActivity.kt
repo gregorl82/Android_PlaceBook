@@ -3,7 +3,9 @@ package com.example.android.placebook.ui
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -146,28 +148,41 @@ class BookmarkDetailsActivity : AppCompatActivity(),
         }
     }
 
+    override fun onPickClick() {
+        val pickIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(pickIntent, REQUEST_GALLERY_IMAGE)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == android.app.Activity.RESULT_OK) {
 
-            when(requestCode) {
+            when (requestCode) {
                 REQUEST_CAPTURE_IMAGE -> {
                     val photoFile = photoFile ?: return
 
-                    val uri = FileProvider.getUriForFile(this, "com.example.placebook.fileprovider", photoFile)
+                    val uri = FileProvider.getUriForFile(
+                        this,
+                        "com.example.placebook.fileprovider",
+                        photoFile
+                    )
                     revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
 
                     val image = getImageWithPath(photoFile.absolutePath)
                     image?.let { updateImage(it) }
                 }
+                REQUEST_GALLERY_IMAGE -> {
+                    if (data != null && data.data != null) {
+                        val imageUri = data.data
+                        val image = getImageWithAuthority(imageUri)
+                        image?.let { updateImage(it) }
+                    }
+
+                }
             }
 
         }
-    }
-
-    override fun onPickClick() {
-        Toast.makeText(this, "Gallery Pick", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateImage(image: Bitmap) {
@@ -184,8 +199,18 @@ class BookmarkDetailsActivity : AppCompatActivity(),
         )
     }
 
+    private fun getImageWithAuthority(uri: Uri): Bitmap? {
+        return ImageUtils.decodeUriStreamToSize(
+            uri,
+            resources.getDimensionPixelSize(R.dimen.default_image_width),
+            resources.getDimensionPixelSize(R.dimen.default_image_height),
+            this
+        )
+    }
+
     companion object {
         private const val REQUEST_CAPTURE_IMAGE = 1
+        private const val REQUEST_GALLERY_IMAGE = 2
     }
 
 }
