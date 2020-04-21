@@ -9,6 +9,8 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
+import android.widget.ProgressBar
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProviders
@@ -186,6 +188,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun displayPoi(pointOfInterest: PointOfInterest) {
+        showProgress()
         displayPoiGetPlaceStep(pointOfInterest)
     }
 
@@ -217,6 +220,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         "Place not found: " + exception.message + ", " + "status code: " + statusCode
                     )
                 }
+                hideProgress()
             }
     }
 
@@ -246,10 +250,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         "Place not found: " + exception.message + ", " + "status code: " + statusCode
                     )
                 }
+                hideProgress()
             }
     }
 
     private fun displayPoiDisplayStep(place: Place, photo: Bitmap?) {
+
+        hideProgress()
 
         val marker = map.addMarker(
             MarkerOptions()
@@ -368,6 +375,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     location.latitude = place.latLng?.latitude ?: 0.0
                     location.longitude = place.latLng?.longitude ?: 0.0
                     updateMapToLocation(location)
+                    showProgress()
 
                     displayPoiGetPhotoStep(place)
                 }
@@ -381,6 +389,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 startBookmarkDetails(it)
             }
         }
+    }
+
+    private fun showProgress() {
+        progressBar.visibility = ProgressBar.VISIBLE
+        disableUserInteraction()
+    }
+
+    private fun hideProgress() {
+        progressBar.visibility = ProgressBar.INVISIBLE
+        enableUserInteraction()
+    }
+
+    private fun disableUserInteraction() {
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        )
+    }
+
+    private fun enableUserInteraction() {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
     }
 
     companion object {
