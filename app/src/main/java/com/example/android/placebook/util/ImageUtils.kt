@@ -92,7 +92,8 @@ object ImageUtils {
                 inputStream.close()
                 inputStream = context.contentResolver.openInputStream(uri)
                 if (inputStream != null) {
-                    options.inSampleSize = calculateInSampleSize(options.outWidth, options.outHeight, width, height)
+                    options.inSampleSize =
+                        calculateInSampleSize(options.outWidth, options.outHeight, width, height)
                     options.inJustDecodeBounds = false
                     val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
                     inputStream.close()

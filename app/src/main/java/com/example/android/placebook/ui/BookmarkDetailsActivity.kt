@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -23,6 +22,7 @@ import com.example.android.placebook.util.ImageUtils
 import com.example.android.placebook.viewmodel.BookmarkDetailsViewModel
 import kotlinx.android.synthetic.main.activity_bookmark_details.*
 import java.io.File
+import java.net.URLEncoder
 
 class BookmarkDetailsActivity : AppCompatActivity(),
     PhotoOptionDialogFragment.PhotoOptionDialogListener {
@@ -37,6 +37,7 @@ class BookmarkDetailsActivity : AppCompatActivity(),
         setupToolbar()
         setupViewModel()
         getIntentData()
+        setupFab()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -82,6 +83,10 @@ class BookmarkDetailsActivity : AppCompatActivity(),
     private fun setupViewModel() {
         bookmarkDetailsViewModel =
             ViewModelProviders.of(this).get(BookmarkDetailsViewModel::class.java)
+    }
+
+    private fun setupFab() {
+        fab.setOnClickListener { sharePlace() }
     }
 
     private fun populateFields() {
@@ -271,6 +276,33 @@ class BookmarkDetailsActivity : AppCompatActivity(),
             }
             .setNegativeButton("Cancel", null)
             .create().show()
+    }
+
+    private fun sharePlace() {
+
+        val bookmarkView = bookmarkDetailsView ?: return
+
+        var mapUrl = ""
+
+        if (bookmarkView.placeId == null) {
+            val location = URLEncoder.encode(
+                "${bookmarkView.latitude}," + "${bookmarkView.longitude}",
+                "utf-8"
+            )
+            mapUrl = "https://www.google.com/maps/dir/?api=1" + "&destination=$location"
+        } else {
+            val name = URLEncoder.encode(bookmarkView.name, "utf-8")
+            mapUrl = "https://www.google.com/maps/dir/?api=1" + "&destination=$name&destination_place_id=" + "${bookmarkView.placeId}"
+        }
+
+        val sendIntent = Intent()
+        sendIntent.action = Intent.ACTION_SEND
+
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "Check out ${bookmarkView.name} at:\n$mapUrl")
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Sharing ${bookmarkView.name}")
+        sendIntent.type = "text/plain"
+
+        startActivity(sendIntent)
     }
 
     companion object {

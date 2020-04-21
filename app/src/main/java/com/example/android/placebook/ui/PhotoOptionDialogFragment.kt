@@ -53,7 +53,8 @@ class PhotoOptionDialogFragment : DialogFragment() {
     companion object {
 
         fun canPick(context: Context?): Boolean {
-            val pickIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            val pickIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             return (pickIntent.resolveActivity(context?.packageManager) != null)
         }
 

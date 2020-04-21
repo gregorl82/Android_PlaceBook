@@ -68,7 +68,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        
+
         setupMapListeners()
         setupViewModel()
         getCurrentLocation()
@@ -341,7 +341,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             Place.Field.PHOTO_METADATAS,
             Place.Field.LAT_LNG,
             Place.Field.ADDRESS,
-            Place.Field.TYPES)
+            Place.Field.TYPES
+        )
 
         val bounds = RectangularBounds.newInstance(map.projection.visibleRegion.latLngBounds)
         try {
