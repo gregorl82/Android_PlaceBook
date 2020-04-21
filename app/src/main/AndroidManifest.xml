@@ -39,11 +39,23 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.BookmarkDetailsActivity"
+        <activity
+            android:name=".ui.BookmarkDetailsActivity"
             android:label="Bookmark"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
+
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.placebook.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
