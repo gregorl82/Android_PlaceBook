@@ -2,6 +2,7 @@ package com.example.android.placebook.ui
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,7 +18,8 @@ import com.example.android.placebook.viewmodel.BookmarkDetailsViewModel
 import kotlinx.android.synthetic.main.activity_bookmark_details.*
 import java.io.File
 
-class BookmarkDetailsActivity : AppCompatActivity(), PhotoOptionDialogFragment.PhotoOptionDialogListener {
+class BookmarkDetailsActivity : AppCompatActivity(),
+    PhotoOptionDialogFragment.PhotoOptionDialogListener {
 
     private lateinit var bookmarkDetailsViewModel: BookmarkDetailsViewModel
     private var bookmarkDetailsView: BookmarkDetailsViewModel.BookmarkDetailsView? = null
@@ -55,13 +57,14 @@ class BookmarkDetailsActivity : AppCompatActivity(), PhotoOptionDialogFragment.P
 
         val bookmarkId = intent.getLongExtra(MapsActivity.Companion.EXTRA_BOOKMARK_ID, 0)
 
-        bookmarkDetailsViewModel.getBookmark(bookmarkId)?.observe(this, Observer<BookmarkDetailsViewModel.BookmarkDetailsView> {
-            it?.let {
-                bookmarkDetailsView = it
-                populateFields()
-                populateImageView()
-            }
-        })
+        bookmarkDetailsViewModel.getBookmark(bookmarkId)
+            ?.observe(this, Observer<BookmarkDetailsViewModel.BookmarkDetailsView> {
+                it?.let {
+                    bookmarkDetailsView = it
+                    populateFields()
+                    populateImageView()
+                }
+            })
 
     }
 
@@ -119,22 +122,66 @@ class BookmarkDetailsActivity : AppCompatActivity(), PhotoOptionDialogFragment.P
             return
         }
         photoFile?.let { photoFile ->
-            val photoUri = FileProvider.getUriForFile(this, "com.example.placebook.fileprovider", photoFile)
+            val photoUri =
+                FileProvider.getUriForFile(this, "com.example.placebook.fileprovider", photoFile)
 
             val captureIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
 
             captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri)
 
-            val intentActivities = packageManager.queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            val intentActivities = packageManager.queryIntentActivities(
+                captureIntent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
             intentActivities.map { it.activityInfo.packageName }
-                .forEach { grantUriPermission(it, photoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+                .forEach {
+                    grantUriPermission(
+                        it,
+                        photoUri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                }
 
             startActivityForResult(captureIntent, REQUEST_CAPTURE_IMAGE)
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == android.app.Activity.RESULT_OK) {
+
+            when(requestCode) {
+                REQUEST_CAPTURE_IMAGE -> {
+                    val photoFile = photoFile ?: return
+
+                    val uri = FileProvider.getUriForFile(this, "com.example.placebook.fileprovider", photoFile)
+                    revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+                    val image = getImageWithPath(photoFile.absolutePath)
+                    image?.let { updateImage(it) }
+                }
+            }
+
+        }
+    }
+
     override fun onPickClick() {
         Toast.makeText(this, "Gallery Pick", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateImage(image: Bitmap) {
+        val bookmarkView = bookmarkDetailsView ?: return
+        imageViewPlace.setImageBitmap(image)
+        bookmarkView.setImage(this, image)
+    }
+
+    private fun getImageWithPath(filePath: String): Bitmap? {
+        return ImageUtils.decodeFileToSize(
+            filePath,
+            resources.getDimensionPixelSize(R.dimen.default_image_width),
+            resources.getDimensionPixelSize(R.dimen.default_image_height)
+        )
     }
 
     companion object {

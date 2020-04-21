@@ -69,7 +69,7 @@ class BookmarkDetailsViewModel(application: Application) : AndroidViewModel(appl
         var name: String = "",
         var phone: String = "",
         var address: String = "",
-        var notes: String= ""
+        var notes: String = ""
     ) {
         fun getImage(context: Context): Bitmap? {
             id?.let {
@@ -77,5 +77,12 @@ class BookmarkDetailsViewModel(application: Application) : AndroidViewModel(appl
             }
             return null
         }
+
+        fun setImage(context: Context, image: Bitmap) {
+            id?.let {
+                ImageUtils.saveBitmapToFile(context, image, Bookmark.generateImageFilename(it))
+            }
+        }
     }
+
 }
