@@ -20,6 +20,15 @@ class MapsViewModel(application: Application) : AndroidViewModel(application) {
     private var bookmarkRepo: BookmarkRepo = BookmarkRepo(getApplication())
     private var bookmarks: LiveData<List<BookmarkView>>? = null
 
+    fun addBookmark(latLng: LatLng): Long? {
+        val bookmark = bookmarkRepo.createBookmark()
+        bookmark.name = "Untitled"
+        bookmark.longitude = latLng.longitude
+        bookmark.lattitude = latLng.latitude
+        bookmark.category = "Other"
+        return bookmarkRepo.addBookmark(bookmark)
+    }
+
     fun addBookmarkFromPlace(place: Place, image: Bitmap?) {
         val bookmark = bookmarkRepo.createBookmark()
         bookmark.placeId = place.id

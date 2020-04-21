@@ -104,6 +104,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         fab.setOnClickListener {
             searchAtCurrentLocation()
         }
+        map.setOnMapLongClickListener { latLng ->
+            newBookmark(latLng)
+        }
     }
 
     private fun setupPlacesClient() {
@@ -367,6 +370,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     displayPoiGetPhotoStep(place)
                 }
+        }
+    }
+
+    private fun newBookmark(latLng: LatLng) {
+        GlobalScope.launch {
+            val bookmarkId = mapsViewModel.addBookmark(latLng)
+            bookmarkId?.let {
+                startBookmarkDetails(it)
+            }
         }
     }
 

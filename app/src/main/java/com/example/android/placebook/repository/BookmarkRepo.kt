@@ -8,7 +8,7 @@ import com.example.android.placebook.db.PlaceBookDatabase
 import com.example.android.placebook.model.Bookmark
 import com.google.android.libraries.places.api.model.Place
 
-class BookmarkRepo(context: Context) {
+class BookmarkRepo(private val context: Context) {
 
     private var db = PlaceBookDatabase.getInstance(context)
     private var bookmarkDao: BookmarkDao = db.bookmarkDao()
@@ -19,6 +19,11 @@ class BookmarkRepo(context: Context) {
         val newId = bookmarkDao.insertBookmark(bookmark)
         bookmark.id = newId
         return newId
+    }
+
+    fun deleteBookmark(bookmark: Bookmark) {
+        bookmark.deleteImage(context)
+        bookmarkDao.deleteBookmark(bookmark)
     }
 
     fun createBookmark(): Bookmark {
